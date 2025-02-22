@@ -13,22 +13,9 @@ public class GreetingController {
     }
 
     @GetMapping
-    public String getGreeting() {
-        return greetingService.getGreetingMessage();
-    }
-
-    @PostMapping
-    public String postGreeting() {
-        return greetingService.getGreetingMessage();
-    }
-
-    @PutMapping
-    public String putGreeting() {
-        return greetingService.getGreetingMessage();
-    }
-
-    @DeleteMapping
-    public String deleteGreeting() {
-        return greetingService.getGreetingMessage();
+    public String getGreeting(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName) {
+        return greetingService.getGreetingMessage(firstName, lastName);
     }
 }
