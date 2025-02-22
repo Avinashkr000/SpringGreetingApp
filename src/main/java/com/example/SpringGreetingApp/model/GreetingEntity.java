@@ -1,23 +1,28 @@
-package com.example.example.SpringGreetingApp.model;
+package com.example.SpringGreetingApp.model;
+
 import jakarta.persistence.*;
 
 @Entity
-public class Greeting {
+public class GreetingEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Ensure ID is auto-generated
     private Long id;
 
     private String message;
 
-    public Greeting() {}
+    public GreetingEntity() {}
 
-    public Greeting(String message) {
+    public GreetingEntity(String message) {
         this.message = message;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getMessage() {
