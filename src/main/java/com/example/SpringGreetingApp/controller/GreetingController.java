@@ -1,15 +1,13 @@
 package com.example.SpringGreetingApp.controller;
 
-import com.example.SpringGreetingApp.model.GreetingEntity;
 import com.example.SpringGreetingApp.service.GreetingService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/greeting")
+@RequestMapping("/greet")
 public class GreetingController {
 
     private final GreetingService greetingService;
@@ -18,29 +16,37 @@ public class GreetingController {
         this.greetingService = greetingService;
     }
 
-    @PostMapping
-    public ResponseEntity<GreetingEntity> createGreeting(@RequestParam String message) {
-        GreetingEntity savedGreeting = greetingService.saveGreeting(message);
-        return ResponseEntity.ok(savedGreeting);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<GreetingEntity> getGreetingById(@PathVariable Long id) {
-        Optional<GreetingEntity> greeting = greetingService.getGreetingById(id);
-        return greeting.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
+    // Generate and save a greeting
     @GetMapping
-    public ResponseEntity<List<GreetingEntity>> getAllGreetings() {
-        List<GreetingEntity> greetings = greetingService.getAllGreetings();
-        return ResponseEntity.ok(greetings);
+    public Map<String, String> getGreet(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName) {
+        return greetingService.getPersonalizedGreeting(firstName, lastName);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GreetingEntity> updateGreeting(@PathVariable Long id, @RequestParam String message) {
-        Optional<GreetingEntity> updatedGreeting = greetingService.updateGreeting(id, message);
-        return updatedGreeting.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    // Retrieve a greeting by ID
+    @GetMapping("/{id}")
+    public Map<String, String> getGreetById(@PathVariable Long id) {
+        return greetingService.getGreetingById(id);
+    }
+
+    // Retrieve all stored greetings
+    @GetMapping("/all")
+    public List<Map<String, String>> getAllGreetings() {
+        return greetingService.getAllGreetings();
+    }
+
+    // Update a greeting message by ID
+    @PutMapping("/update/{id}")
+    public Map<String, String> updateGreeting(
+            @PathVariable Long id,
+            @RequestParam String message) {
+        return greetingService.updateGreeting(id, message);
+    }
+
+    // Delete a greeting message by ID
+    @DeleteMapping("/delete/{id}")
+    public Map<String, String> deleteGreeting(@PathVariable Long id) {
+        return greetingService.deleteGreeting(id);
     }
 }

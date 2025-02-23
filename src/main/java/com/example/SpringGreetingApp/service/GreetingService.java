@@ -1,11 +1,9 @@
 package com.example.SpringGreetingApp.service;
-
 import com.example.SpringGreetingApp.model.GreetingEntity;
 import com.example.SpringGreetingApp.repository.GreetingRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class GreetingService {
@@ -16,24 +14,91 @@ public class GreetingService {
         this.greetingRepository = greetingRepository;
     }
 
-    public GreetingEntity saveGreeting(String message) {
-        GreetingEntity greeting = new GreetingEntity();
-        greeting.setMessage(message);
-        return greetingRepository.save(greeting);
+    // Generate a greeting, save it to the database, and return it
+    public Map<String, String> getPersonalizedGreeting(String firstName, String lastName) {
+        Map<String, String> response = new HashMap<>();
+        String message;
+
+        if (firstName != null && lastName != null) {
+            message = "Hello, " + firstName + " " + lastName + "!";
+        } else if (firstName != null) {
+            message = "Hello, " + firstName + "!";
+        } else if (lastName != null) {
+            message = "Hello, " + lastName + "!";
+        } else {
+            message = "Hello World";
+        }
+
+        // Save message to database
+        GreetingEntity greetingEntity = new GreetingEntity(message);
+        GreetingEntity savedGreeting = greetingRepository.save(greetingEntity);
+
+        response.put("id", String.valueOf(savedGreeting.getId())); // Return the saved ID
+        response.put("message", message);
+        return response;
     }
 
-    public Optional<GreetingEntity> getGreetingById(Long id) {
-        return greetingRepository.findById(id);
+    // Retrieve a saved greeting by ID
+    public Map<String, String> getGreetingById(Long id) {
+        Map<String, String> response = new HashMap<>();
+        Optional<GreetingEntity> greeting = greetingRepository.findById(id);
+
+        if (greeting.isPresent()) {
+            response.put("id", String.valueOf(greeting.get().getId()));
+            response.put("message", greeting.get().getMessage());
+        } else {
+            response.put("error", "Greeting not found!");
+        }
+
+        return response;
     }
 
-    public List<GreetingEntity> getAllGreetings() {
-        return greetingRepository.findAll();
+    // Retrieve all stored greetings
+    public List<Map<String, String>> getAllGreetings() {
+        List<GreetingEntity> greetings = greetingRepository.findAll();
+        List<Map<String, String>> response = new ArrayList<>();
+
+        for (GreetingEntity greeting : greetings) {
+            Map<String, String> greetingMap = new HashMap<>();
+            greetingMap.put("id", String.valueOf(greeting.getId()));
+            greetingMap.put("message", greeting.getMessage());
+            response.add(greetingMap);
+        }
+
+        return response;
     }
 
-    public Optional<GreetingEntity> updateGreeting(Long id, String newMessage) {
-        return greetingRepository.findById(id).map(greeting -> {
+    // Update an existing greeting message
+    public Map<String, String> updateGreeting(Long id, String newMessage) {
+        Map<String, String> response = new HashMap<>();
+        Optional<GreetingEntity> existingGreeting = greetingRepository.findById(id);
+
+        if (existingGreeting.isPresent()) {
+            GreetingEntity greeting = existingGreeting.get();
             greeting.setMessage(newMessage);
-            return greetingRepository.save(greeting);
-        });
+            greetingRepository.save(greeting);
+
+            response.put("id", String.valueOf(greeting.getId()));
+            response.put("message", greeting.getMessage());
+        } else {
+            response.put("error", "Greeting not found!");
+        }
+
+        return response;
+    }
+
+    // Delete a greeting message by ID
+    public Map<String, String> deleteGreeting(Long id) {
+        Map<String, String> response = new HashMap<>();
+        Optional<GreetingEntity> existingGreeting = greetingRepository.findById(id);
+
+        if (existingGreeting.isPresent()) {
+            greetingRepository.deleteById(id);
+            response.put("message", "Greeting deleted successfully!");
+        } else {
+            response.put("error", "Greeting not found!");
+        }
+
+        return response;
     }
 }
