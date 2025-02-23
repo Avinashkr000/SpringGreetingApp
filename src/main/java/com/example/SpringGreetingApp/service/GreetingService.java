@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Service
 public class GreetingService {
+
     private final GreetingRepository greetingRepository;
 
     public GreetingService(GreetingRepository greetingRepository) {
@@ -27,5 +28,12 @@ public class GreetingService {
 
     public List<GreetingEntity> getAllGreetings() {
         return greetingRepository.findAll();
+    }
+
+    public Optional<GreetingEntity> updateGreeting(Long id, String newMessage) {
+        return greetingRepository.findById(id).map(greeting -> {
+            greeting.setMessage(newMessage);
+            return greetingRepository.save(greeting);
+        });
     }
 }

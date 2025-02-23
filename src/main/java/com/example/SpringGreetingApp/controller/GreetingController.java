@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
 @RestController
-@RequestMapping("/api/greeting")  // Changed from "/greeting" to "/api/greeting"
+@RequestMapping("/api/greeting")
 public class GreetingController {
+
     private final GreetingService greetingService;
 
     public GreetingController(GreetingService greetingService) {
@@ -28,10 +30,17 @@ public class GreetingController {
         return greeting.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
     @GetMapping
     public ResponseEntity<List<GreetingEntity>> getAllGreetings() {
         List<GreetingEntity> greetings = greetingService.getAllGreetings();
         return ResponseEntity.ok(greetings);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<GreetingEntity> updateGreeting(@PathVariable Long id, @RequestParam String message) {
+        Optional<GreetingEntity> updatedGreeting = greetingService.updateGreeting(id, message);
+        return updatedGreeting.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
