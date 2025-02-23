@@ -1,5 +1,6 @@
 package com.example.SpringGreetingApp.controller;
 
+import com.example.SpringGreetingApp.exception.ResourceNotFoundException;
 import com.example.SpringGreetingApp.model.Employee;
 import com.example.SpringGreetingApp.repository.EmployeeRepository;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/employees")
-@CrossOrigin(origins = "http://localhost:3306") // Allow frontend requests
+@CrossOrigin(origins = "*") // Allow API to be accessed from any frontend
 public class EmployeeController {
 
     private final EmployeeRepository repository;
@@ -21,31 +22,36 @@ public class EmployeeController {
 
     // GET: Retrieve all employees
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return repository.findAll();
+    public ResponseEntity<List<Employee>> getAllEmployees() {
+        List<Employee> employees = repository.findAll();
+        return ResponseEntity.ok(employees);
     }
 
     // GET: Retrieve a specific employee by ID
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
-        Optional<Employee> employee = repository.findById(id);
-        return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // POST: Create a new employee
     @PostMapping
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return repository.save(employee);
+    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
+        Employee savedEmployee = repository.save(employee);
+        return ResponseEntity.ok(savedEmployee);
     }
 
-    // PUT: Update an existing employee
-    @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee newEmployee) {
-        return repository.findById(id).map(employee -> {
-            employee.setName(newEmployee.getName());
-            employee.setRole(newEmployee.getRole());
-            return ResponseEntity.ok(repository.save(employee));
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+    @PutMapping("/{id}") // Corrected path
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
+        Employee employee = repository.findById(id) // Use 'repository' instead of 'employeeRepository'
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        employee.setName(employeeDetails.getName());
+        employee.setRole(employeeDetails.getRole());
+
+        Employee updatedEmployee = repository.save(employee);
+        return ResponseEntity.ok(updatedEmployee);
     }
 
     // DELETE: Remove an employee
@@ -54,8 +60,7 @@ public class EmployeeController {
         if (repository.existsById(id)) {
             repository.deleteById(id);
             return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.notFound().build();
     }
 }

@@ -1,41 +1,32 @@
 package com.example.SpringGreetingApp.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "employees")
+@Data
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    @NonNull // Lombok annotation to require a value in the constructor
     private String name;
+
+    @Column(nullable = false)
+    @NonNull
     private String role;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false)
+    @NonNull
+    private double salary;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
+    @Column(nullable = false)
+    @NonNull
+    private String department;
 }
-
