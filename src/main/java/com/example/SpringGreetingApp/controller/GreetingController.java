@@ -5,6 +5,7 @@ import com.example.SpringGreetingApp.service.GreetingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 @RestController
 @RequestMapping("/api/greeting")  // Changed from "/greeting" to "/api/greeting"
@@ -27,4 +28,10 @@ public class GreetingController {
         return greeting.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+    @GetMapping
+    public ResponseEntity<List<GreetingEntity>> getAllGreetings() {
+        List<GreetingEntity> greetings = greetingService.getAllGreetings();
+        return ResponseEntity.ok(greetings);
+    }
+
 }
